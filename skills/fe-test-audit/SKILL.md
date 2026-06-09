@@ -162,8 +162,11 @@ if [ -z "$AUDIT_BASE_BRANCH" ] || [ "$AUDIT_BASE_BRANCH" = "HEAD" ]; then
 fi
 echo "Base branch: ${AUDIT_BASE_BRANCH:-<unresolved>}"
 
-# 1e. Confirm this is a FE/JS-TS repo at all.
-[ -f package.json ] || nothing "no package.json at repo root — not a JS/TS frontend repo"
+# 1e. Confirm this repo contains a JS/TS package SOMEWHERE — root OR a subdirectory. Monorepos
+#     often keep the frontend under frontend/, web/, client/, or apps/* with NO root
+#     package.json, so do NOT require one at the root; runner detection in 1h is the real gate.
+git ls-files -- '*package.json' 2>/dev/null | grep -qv node_modules \
+  || nothing "no package.json anywhere in the repo — not a JS/TS project"
 
 # 1f. Ensure a git identity exists (an unattended commit fails without one). Set a
 #     fallback author so the commit in Step 6 cannot fail mid-flight.
@@ -686,23 +689,41 @@ whave() { printf '%s' "$WHAY" | grep -qiE "$1"; }
 T=""        # the verify command, scoped to exactly one file
 RUNCTX="env CI=true CYPRESS_CRASH_REPORTS=0 timeout ${AUDIT_VERIFY_TIMEOUT}"
 
+# Path RELATIVE to the workspace we cd into. $FILE is repo-root-relative (e.g.
+# frontend/src/Foo.test.tsx); we run from $WS (e.g. frontend/), so strip the leading "$WS/" —
+# otherwise the runner looks for frontend/frontend/src/... and fails. When $WS is the repo root
+# there is no prefix to strip and REL == FILE.
+REL="${FILE#"$WS"/}"
+
+# Re-detect the PACKAGE MANAGER for THIS workspace — a monorepo subdir may use a different PM
+# than the repo root. Check the workspace dir first, then the repo root; fall back to the
+# repo-level $RUN from Step 1g.
+WRUN="$RUN"
+for d in "$WS" "$ROOT"; do
+  if   [ -f "$d/pnpm-lock.yaml" ];                    then WRUN="pnpm exec";   break
+  elif [ -f "$d/yarn.lock" ];                         then WRUN="yarn exec";   break
+  elif [ -f "$d/bun.lockb" ] || [ -f "$d/bun.lock" ]; then WRUN="bunx";        break
+  elif [ -f "$d/package-lock.json" ];                 then WRUN="npm exec --"; break
+  fi
+done
+
 if   whave '"vitest"|vitest\.config|vitest\.workspace'; then
-  # `run` = no watch; pass the exact repo-relative path. (Bare `vitest <name>` is a substring
+  # `run` = no watch; pass the workspace-relative path. (Bare `vitest <name>` is a substring
   # FILTER, not a file — `run <path>` plus --no-watch keeps it to the one file.)
-  T="$RUN vitest run --no-watch \"$FILE\""
+  T="$WRUN vitest run --no-watch \"$REL\""
 elif whave '"jest"|jest\.config'; then
-  T="$RUN jest --runTestsByPath \"$FILE\" --ci --watchAll=false --silent"     # exact file
+  T="$WRUN jest --runTestsByPath \"$REL\" --ci --watchAll=false --silent"     # exact file
 elif whave '"@playwright/test"|playwright\.config'; then
-  T="$RUN playwright test \"$FILE\""        # needs a running app/server; see note below
+  T="$WRUN playwright test \"$REL\""        # needs a running app/server; see note below
 elif whave '"cypress"|cypress\.config'; then
-  case "$(basename "$FILE")" in
-    *.cy.tsx|*.cy.jsx) T="$RUN cypress run --component --spec \"$FILE\"" ;;    # component spec
-    *)                 T="$RUN cypress run --e2e --spec \"$FILE\"" ;;          # e2e spec (needs app)
+  case "$(basename "$REL")" in
+    *.cy.tsx|*.cy.jsx) T="$WRUN cypress run --component --spec \"$REL\"" ;;    # component spec
+    *)                 T="$WRUN cypress run --e2e --spec \"$REL\"" ;;          # e2e spec (needs app)
   esac
 elif whave '"mocha"|\.mocharc'; then
-  T="$RUN mocha \"$FILE\""
+  T="$WRUN mocha \"$REL\""
 elif whave '"jasmine"|jasmine\.json'; then
-  T="$RUN jasmine \"$FILE\""
+  T="$WRUN jasmine \"$REL\""
 fi
 
 if [ -n "$T" ]; then
@@ -735,9 +756,19 @@ Notes:
 
 ## STEP 6 — Deliver via Pull Request (never to main)
 
-Run only if at least one file changed (dry-run already exited in Step 4).
+First, if nothing was reworked or deleted, stop here with a clean status. Otherwise create the
+branch, stage only the touched files, commit, push, and open the PR.
 
 ```bash
+# 6·pre. If you reworked or deleted NOTHING (every candidate was meaningful or kept-and-flagged),
+#        there is nothing to deliver — an audit DID run, so this is success, not an error. Emit a
+#        clean `nothing` status and STOP before creating any branch. (TOUCHED is the explicit list
+#        of reworked+deleted paths from Steps 4–5; if you tracked it in your own working memory
+#        instead of the shell var, apply the same check to that list.)
+if [ -z "$(printf '%s' "$TOUCHED" | sed '/^$/d')" ]; then
+  nothing "audited $TOTAL test file(s); 0 fake found — nothing to rework, delete, or ship"
+fi
+
 # 6a. Create the audit branch BEFORE relying on it. (Branch was ideally created before edits;
 #     if you instead edited on the base checkout, create it now — deletions are still only in
 #     the working tree, not committed, so switching carries them onto the new branch.)
@@ -850,9 +881,11 @@ fi
 Every run MUST end on exactly one machine-grep-able status line so the weekly job can
 distinguish healthy idleness from a silent break:
 
-- `AUDIT_RESULT=nothing: <reason>` — legitimately nothing to do (no repo / no runner / no
-  candidates / clean idle week). Exit 0. Healthy.
-- `AUDIT_RESULT=ok: <summary>` — audited and delivered (PR opened, or dry-run completed).
+- `AUDIT_RESULT=nothing: <reason>` — legitimately nothing to do OR an audit ran and found
+  nothing to change: no repo / no runner / no candidates in the window / all candidates
+  meaningful (0 reworked, 0 deleted). Exit 0. Healthy. **No PR is opened in this case.**
+- `AUDIT_RESULT=ok: <summary>` — audited AND delivered changes: a PR was opened (or a dry-run
+  completed). `ok` implies a PR exists except for dry-run; do NOT use it when nothing changed.
   Exit 0.
 - `AUDIT_RESULT=error: <reason>` — could NOT run or could NOT deliver (broken discovery,
   push/PR failure, unexpected staged paths). **Exit non-zero so the scheduler alerts a human.**
