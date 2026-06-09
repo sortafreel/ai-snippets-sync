@@ -1,6 +1,10 @@
 matches:
   - trigger: ":ask"
-    replace: "Ask clarifying questions, if any, till crystal clear. "
+    replace: "Ask clarifying questions, if any, till crystal clear."
+  - trigger: ":look"
+    replace: "Analyze the context, attached files/URLs, if any, and related codebase in detail to understand the task and its feasibility."
+  - trigger: ":test"
+    replace: "If applicable, add tests. Ensure to add only tests that test something, not mocks testing mocks."
   - trigger: ":init"
     replace: "## Context\n- \n\n## Concerns\n- \n\n## Task\n- "
   - trigger: ":ai-review"
