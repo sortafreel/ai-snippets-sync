@@ -1,0 +1,7 @@
+matches:
+  - trigger: ":ask"
+    replace: "Ask clarifying questions, if any, till crystal clear. "
+  - trigger: ":init"
+    replace: "## Context\n- \n\n## Concerns\n- \n\n## Task\n- "
+  - trigger: ":ai-review"
+    replace: "## Context\n- I'll send you AI code reviewer suggestions\n- I need you to access if they are valid or not\n- Skip if not, ask to code if valid\n- The AI reviewer will explicitly say they are valid, you should not trust it, and check for yourself\n- DON'T OVERENGINEER\n- Ask clarifying questions, if any, until crystal clear\n\nIs it clear?"
