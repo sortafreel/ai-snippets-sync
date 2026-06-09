@@ -926,153 +926,48 @@ verify_after() { kind="$1"; shift
 
 ---
 
-## STEP 6 — Deliver via Pull Request (never to main)
+## STEP 6 — Deliver the changes for review (never the default branch)
 
-First, if nothing was edited, stop here with a clean status. Otherwise create the branch, stage
-only the touched docs, commit, push, and open the PR.
+**If you changed nothing this run, stop here.** Emit `AUDIT_RESULT=nothing` — an audit ran and
+found nothing to change, which is success, not an error — and do not create a branch or open a PR.
 
-```bash
-# 6·pre. If you edited NOTHING (every claim was current or kept-and-flagged), there is nothing
-#        to deliver — an audit DID run, so this is success, not an error. Emit a clean `nothing`
-#        status and STOP before creating any branch. (TOUCHED is the explicit list of EDITED doc
-#        paths from Steps 4–5; if you tracked it in working memory instead of the shell var,
-#        apply the same check to that list.)
-if [ -z "$(printf '%s' "$TOUCHED" | sed '/^$/d')" ]; then
-  nothing "audited $TOTAL doc(s); 0 grounded drift found — nothing to fix or ship"
-fi
+Otherwise, open a Pull Request with your changes for a human to review. **You are Claude Code — use
+whatever branch / commit / PR flow is correct for the environment you are running in; do not follow a
+rigid script.** For example: in Claude Code Cloud you are already on a dedicated working branch, so
+commit there and let the platform surface or open the PR (and honor any standing "don't open PRs"
+rule — the platform handles it); in a plain checkout, create a short-lived branch off the default
+branch and open a PR (e.g. `gh pr create`), or, if `gh` is unavailable, push the branch and report
+that a PR should be opened.
 
-# 6a. Create the audit branch BEFORE relying on it. (Branch was ideally created before edits;
-#     if you instead edited on the base checkout, create it now — edits are still only in the
-#     working tree, not committed, so switching carries them onto the new branch.)
-STAMP="$(date +%Y%m%d-%H%M%S)"
-BRANCH="${AUDIT_BRANCH_PREFIX}/${STAMP}-$$"           # PID suffix avoids same-second collisions
-n=0
-until git switch -c "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" 2>/dev/null; do
-  n=$((n+1)); BRANCH="${AUDIT_BRANCH_PREFIX}/${STAMP}-$$-$n"
-  [ "$n" -gt 5 ] && fail "could not create a unique audit branch"
-done
-echo "Audit branch: $BRANCH"
+**Non-negotiable rules — these are safety policy, NOT mechanics; never relax them:**
+- **Commit ONLY the files this run changed** (the target doc files you edited in Step 4). NEVER `git add -A`, and never
+  sweep in unrelated or untracked files (lockfile churn, `.env`, build artifacts). If anything
+  outside your changed set would be staged, stop and report instead of committing.
+- **Never commit to, push to, or merge into the default/main branch.** It changes only through a
+  human-reviewed PR.
+- **Never force-push, never delete branches, and never merge the PR yourself.**
 
-# 6b. Stop if nothing actually changed.
-if [ -z "$(git status --porcelain)" ]; then
-  git switch "${CUR_BRANCH:-$AUDIT_BASE_BRANCH}" 2>/dev/null || true
-  nothing "no changes produced (all claims current/flagged)"
-fi
-
-# 6c. Stage ONLY the docs this run touched — NEVER `git add -A` (an unattended checkout can be
-#     dirty with lockfile churn / .env / generated artifacts, which must not enter the PR).
-#     TOUCHED is the explicit list of EDITED target doc paths from Steps 4–5.
-printf '%s\n' "$TOUCHED" | sed '/^$/d' | sort -u | while IFS= read -r p; do
-  [ -z "$p" ] && continue
-  git add -- "$p"          # stage exactly that doc's modification
-done
-# Safety net: if anything outside TOUCHED is somehow staged, abort rather than ship it.
-if git diff --cached --name-only | grep -vxF -f <(printf '%s\n' "$TOUCHED" | sed '/^$/d' | sort -u) | grep . ; then
-  echo "Refusing to commit: staged paths outside the touched-doc set:"; git diff --cached --name-only
-  fail "unexpected staged paths (possible dirty tree) — aborting before commit"
-fi
-
-# 6d. Commit (identity guaranteed in Step 1d).
-git commit -m "docs: audit & fix AGENTS.md/ARCHITECTURE.md drift ($STAMP)" -m "$(cat <<'BODY'
-Automated weekly doc-freshness audit.
-Full re-verification (no git window). Every edit is grounded in a concrete, re-checkable
-repo fact and re-verified after editing. No documented command/script/test/build was executed.
-Only the target AGENTS.md/ARCHITECTURE.md files were edited; no source/config/CI was touched.
-See the per-claim verdict table in the PR body.
-BODY
-)" || fail "commit failed"
-
-# 6e. Push — capture success; do NOT assume it worked.
-PUSHED=0
-git push -u origin "$BRANCH" && PUSHED=1
-```
-
-**Build the PR body** containing a per-claim verdict table — one row per checked claim, with
-every low-confidence/judgment-call edit flagged and every unverifiable claim listed as left:
-
-```bash
-PR_BODY_FILE="$(mktemp)"
-cat > "$PR_BODY_FILE" <<HDR
-## Agent-docs freshness audit
-
-Automated weekly run. **Full re-verification** of every tracked AGENTS.md / ARCHITECTURE.md —
-no git window. Verification is **read-only and static**: no documented command, script, test,
-build, or service was ever executed; the network was never touched.
-Only the target docs were edited; all source/config/manifests were read-only evidence.
-Conservative by design: anything unverifiable was kept and flagged, not edited.
-Every edit cites a concrete repo fact and was re-verified after editing.
-
-| Doc | Claim | Status | Action | Evidence |
-|-----|-------|--------|--------|----------|
-HDR
-# Append one row per checked claim:
-#   status   = current | stale | unverifiable
-#   action   = fixed | added | kept (flagged) | deferred (edit cap)
-#   evidence = the exact repo fact (path that exists/doesn't, manifest key + file, pin value,
-#              link target / heading slug). Best-effort/structural edits MUST be marked
-#              "low-confidence" so a human scrutinizes them.
-# Include the contents of $RESULTS here, then any DEFERRED docs (over the AUDIT_MAX_DOCS cap).
-```
-
-**Delivery ladder — always end in a clearly-reported state, gated on `PUSHED`:**
-
-```bash
-# Resolve owner/repo for a real compare URL (only if origin is a GitHub remote).
-REMOTE="$(git remote get-url origin 2>/dev/null)"
-SLUG="$(printf '%s' "$REMOTE" | sed -E 's#^git@github\.com:##; s#^https?://github\.com/##; s#\.git$##')"
-
-if [ "$PUSHED" = 1 ] && [ -n "$AUDIT_BASE_BRANCH" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  if gh pr create --base "$AUDIT_BASE_BRANCH" --head "$BRANCH" \
-       --title "docs: fix AGENTS.md/ARCHITECTURE.md drift ($STAMP)" \
-       --body-file "$PR_BODY_FILE"; then
-    echo "AUDIT_RESULT=ok: PR opened against $AUDIT_BASE_BRANCH (branch $BRANCH)."
-  else
-    echo "AUDIT_RESULT=error: gh pr create failed; branch $BRANCH is pushed. Verdict report:"
-    cat "$PR_BODY_FILE"; exit 1
-  fi
-elif [ "$PUSHED" = 1 ]; then
-  echo "gh unavailable/unauthenticated OR base branch unresolved — branch pushed, open the PR manually."
-  case "$REMOTE" in
-    *github.com*) [ -n "$AUDIT_BASE_BRANCH" ] \
-        && echo "Compare: https://github.com/${SLUG}/compare/${AUDIT_BASE_BRANCH}...${BRANCH}?expand=1" \
-        || echo "Compare: https://github.com/${SLUG}/tree/${BRANCH} (choose a base manually)";;
-  esac
-  echo "--- Verdict report ---"; cat "$PR_BODY_FILE"
-  echo "AUDIT_RESULT=error: delivery incomplete — PR not opened, human action required."
-  exit 1
-else
-  echo "PUSH FAILED (no remote/creds). Local branch '$BRANCH' holds the changes."
-  echo "--- Verdict report ---"; cat "$PR_BODY_FILE"
-  echo "AUDIT_RESULT=error: push failed — delivery incomplete, human action required."
-  exit 1
-fi
-```
-
-**Never** merge, never force-push, never `--delete-branch`, never commit to the default branch.
+**PR description** — include a per-claim verdict table (`doc | claim | status (current/stale/unverifiable) | action (fixed/added/kept-flagged) | evidence`), the note that verification was read-only and static (no documented command, test, or build was executed), that every edit is grounded in a concrete repo fact, and that anything unverifiable was left and flagged.
 
 ---
 
-## STEP 7 — Final status (so the scheduler knows what happened)
+## STEP 7 — Final status
 
-Every run MUST end on exactly one machine-grep-able status line so the weekly job can
-distinguish healthy idleness from a silent break:
+End on exactly one machine-grep-able status line so the caller can tell healthy idleness from a
+silent break:
 
-- `AUDIT_RESULT=nothing: <reason>` — legitimately nothing to do OR an audit ran and found
-  nothing to change: no repo / no target docs tracked / all claims current or kept-and-flagged
-  (0 edits). Exit 0. Healthy. **No PR is opened in this case.**
-- `AUDIT_RESULT=ok: <summary>` — audited AND delivered changes: a PR was opened (or a dry-run
-  completed). `ok` implies a PR exists except for dry-run; do NOT use it when nothing changed.
-  Exit 0.
-- `AUDIT_RESULT=error: <reason>` — could NOT run or could NOT deliver (broken discovery,
-  push/PR failure, unexpected staged paths). **Exit non-zero so the scheduler alerts a human.**
-  A failed verify-after-edit is NOT an error — it reverts the unsafe hunk and keeps-and-flags.
+- `AUDIT_RESULT=nothing: <reason>` — nothing to do, OR an audit ran and found nothing to change
+  (no repo / no runner / no candidates / all documented claims current). Exit 0. Healthy. **No PR in this case.**
+- `AUDIT_RESULT=ok: <summary>` — audited AND delivered changes for review: a PR was opened, or —
+  in an environment that manages PRs for you — your changes were committed and pushed to the working
+  branch. Exit 0.
+- `AUDIT_RESULT=error: <reason>` — could NOT run or could NOT deliver. **Exit non-zero so the caller
+  alerts a human.**
 
 For Claude Code Cloud, surface the `error` path as a notification rather than swallowing it.
-A green run with `AUDIT_RESULT=nothing` every single week, on a repo you know changes its
-structure/commands, is itself a signal to investigate discovery (re-check `AUDIT_DOC_BASENAMES`
-and that the target docs are tracked and not under an excluded tree).
 
 ---
+
 
 ## SAFETY (read this — it governs every step)
 

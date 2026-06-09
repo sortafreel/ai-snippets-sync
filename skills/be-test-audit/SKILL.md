@@ -1158,148 +1158,48 @@ Notes:
 
 ---
 
-## STEP 6 — Deliver via Pull Request (never to main)
+## STEP 6 — Deliver the changes for review (never the default branch)
 
-First, if nothing was reworked or deleted, stop here with a clean status. Otherwise create the
-branch, stage only the touched files, commit, push, and open the PR.
+**If you changed nothing this run, stop here.** Emit `AUDIT_RESULT=nothing` — an audit ran and
+found nothing to change, which is success, not an error — and do not create a branch or open a PR.
 
-```bash
-# 6·pre. If you reworked or deleted NOTHING (every candidate was meaningful or kept-and-flagged),
-#        there is nothing to deliver — an audit DID run, so this is success, not an error. Emit a
-#        clean `nothing` status and STOP before creating any branch. (TOUCHED is the explicit list
-#        of reworked+deleted paths from Steps 4–5; if you tracked it in your own working memory
-#        instead of the shell var, apply the same check to that list.)
-if [ -z "$(printf '%s' "$TOUCHED" | sed '/^$/d')" ]; then
-  nothing "audited $TOTAL test file(s); 0 fake found — nothing to rework, delete, or ship"
-fi
+Otherwise, open a Pull Request with your changes for a human to review. **You are Claude Code — use
+whatever branch / commit / PR flow is correct for the environment you are running in; do not follow a
+rigid script.** For example: in Claude Code Cloud you are already on a dedicated working branch, so
+commit there and let the platform surface or open the PR (and honor any standing "don't open PRs"
+rule — the platform handles it); in a plain checkout, create a short-lived branch off the default
+branch and open a PR (e.g. `gh pr create`), or, if `gh` is unavailable, push the branch and report
+that a PR should be opened.
 
-# 6a. Create the audit branch BEFORE relying on it. (Branch was ideally created before edits;
-#     if you instead edited on the base checkout, create it now — deletions are still only in
-#     the working tree, not committed, so switching carries them onto the new branch.)
-STAMP="$(date +%Y%m%d-%H%M%S)"
-BRANCH="${AUDIT_BRANCH_PREFIX}/${STAMP}-$$"           # PID suffix avoids same-second collisions
-n=0
-until git switch -c "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" 2>/dev/null; do
-  n=$((n+1)); BRANCH="${AUDIT_BRANCH_PREFIX}/${STAMP}-$$-$n"
-  [ "$n" -gt 5 ] && fail "could not create a unique audit branch"
-done
-echo "Audit branch: $BRANCH"
+**Non-negotiable rules — these are safety policy, NOT mechanics; never relax them:**
+- **Commit ONLY the files this run changed** (the reworked/deleted test files you tracked in Steps 4–5). NEVER `git add -A`, and never
+  sweep in unrelated or untracked files (lockfile churn, `.env`, build artifacts). If anything
+  outside your changed set would be staged, stop and report instead of committing.
+- **Never commit to, push to, or merge into the default/main branch.** It changes only through a
+  human-reviewed PR.
+- **Never force-push, never delete branches, and never merge the PR yourself.**
 
-# 6b. Stop if nothing actually changed.
-if [ -z "$(git status --porcelain)" ]; then
-  git switch "${CUR_BRANCH:-$AUDIT_BASE_BRANCH}" 2>/dev/null || true
-  nothing "no changes produced (all candidates kept/flagged)"
-fi
-
-# 6c. Stage ONLY the files this run touched — NEVER `git add -A` (an unattended checkout can be
-#     dirty with lockfile churn / .env / generated artifacts, which must not enter the PR).
-#     TOUCHED is the explicit list from Steps 4–5 (reworked + deleted paths). Stage adds AND
-#     deletions of exactly those paths.
-printf '%s\n' "$TOUCHED" | sed '/^$/d' | sort -u | while IFS= read -r p; do
-  [ -z "$p" ] && continue
-  git add -A -- "$p"        # `-A -- <path>` stages a modification OR a deletion of that path
-done
-# Safety net: if anything outside TOUCHED is somehow staged, abort rather than ship it.
-if git diff --cached --name-only | grep -vxF -f <(printf '%s\n' "$TOUCHED" | sed '/^$/d' | sort -u) | grep . ; then
-  echo "Refusing to commit: staged paths outside the touched-file set:"; git diff --cached --name-only
-  fail "unexpected staged paths (possible dirty tree) — aborting before commit"
-fi
-
-# 6d. Commit (identity guaranteed in Step 1f).
-git commit -m "chore(test): audit & prune fake backend tests ($STAMP)" -m "$(cat <<'BODY'
-Automated weekly Python backend test-quality audit.
-Reworked fake-but-salvageable tests into behavioral tests; deleted unsalvageable ones.
-Only the specific affected test files were run; the full suite was NOT executed.
-See the verdict table in the PR body.
-BODY
-)" || fail "commit failed"
-
-# 6e. Push — capture success; do NOT assume it worked.
-PUSHED=0
-git push -u origin "$BRANCH" && PUSHED=1
-```
-
-**Build the PR body** containing a verdict table — one row per processed candidate, plus
-`keep (flagged)` rows and any files deferred over the cap:
-
-```bash
-PR_BODY_FILE="$(mktemp)"
-cat > "$PR_BODY_FILE" <<HDR
-## Backend test-quality audit
-
-Automated weekly run. Window: Python test files added/modified in the last \`$AUDIT_LOOKBACK\`.
-**The full test suite was NOT run** — only the specific affected files were executed.
-Conservative by design: anything ambiguous was kept and flagged, not deleted.
-${SHALLOW_WARN:+> $SHALLOW_WARN}
-
-| File | Type | Verdict | Action | Rationale |
-|------|------|---------|--------|-----------|
-HDR
-# Append one row per processed file:
-#   type    = unit | integration | functional | endpoint
-#   verdict = fake | meaningful | unsure
-#   action  = reworked | reworked (unverified: needs DB/services) | deleted | kept (flagged) | skipped (cap)
-# Include the contents of $RESULTS here.
-```
-
-**Delivery ladder — always end in a clearly-reported state, gated on `PUSHED`:**
-
-```bash
-# Resolve owner/repo for a real compare URL (only if origin is a GitHub remote).
-REMOTE="$(git remote get-url origin 2>/dev/null)"
-SLUG="$(printf '%s' "$REMOTE" | sed -E 's#^git@github\.com:##; s#^https?://github\.com/##; s#\.git$##')"
-
-if [ "$PUSHED" = 1 ] && [ -n "$AUDIT_BASE_BRANCH" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  if gh pr create --base "$AUDIT_BASE_BRANCH" --head "$BRANCH" \
-       --title "chore(test): prune & rework fake backend tests ($STAMP)" \
-       --body-file "$PR_BODY_FILE"; then
-    echo "AUDIT_RESULT=ok: PR opened against $AUDIT_BASE_BRANCH (branch $BRANCH)."
-  else
-    echo "AUDIT_RESULT=error: gh pr create failed; branch $BRANCH is pushed. Verdict report:"
-    cat "$PR_BODY_FILE"; exit 1
-  fi
-elif [ "$PUSHED" = 1 ]; then
-  echo "gh unavailable/unauthenticated OR base branch unresolved — branch pushed, open the PR manually."
-  case "$REMOTE" in
-    *github.com*) [ -n "$AUDIT_BASE_BRANCH" ] \
-        && echo "Compare: https://github.com/${SLUG}/compare/${AUDIT_BASE_BRANCH}...${BRANCH}?expand=1" \
-        || echo "Compare: https://github.com/${SLUG}/tree/${BRANCH} (choose a base manually)";;
-  esac
-  echo "--- Verdict report ---"; cat "$PR_BODY_FILE"
-  echo "AUDIT_RESULT=error: delivery incomplete — PR not opened, human action required."
-  exit 1
-else
-  echo "PUSH FAILED (no remote/creds). Local branch '$BRANCH' holds the changes."
-  echo "--- Verdict report ---"; cat "$PR_BODY_FILE"
-  echo "AUDIT_RESULT=error: push failed — delivery incomplete, human action required."
-  exit 1
-fi
-```
-
-**Never** merge, never force-push, never `--delete-branch`, never commit to the default branch.
+**PR description** — include a verdict table — one row per processed file (`file | type | verdict | action | rationale`) — the note that the full suite was NOT run (only the specific affected files were executed) and that anything ambiguous was kept and flagged rather than deleted, plus any files deferred over the cap.
 
 ---
 
-## STEP 7 — Final status (so the scheduler knows what happened)
+## STEP 7 — Final status
 
-Every run MUST end on exactly one machine-grep-able status line so the weekly job can
-distinguish healthy idleness from a silent break:
+End on exactly one machine-grep-able status line so the caller can tell healthy idleness from a
+silent break:
 
-- `AUDIT_RESULT=nothing: <reason>` — legitimately nothing to do OR an audit ran and found
-  nothing to change: no repo / no runner / no candidates in the window / all candidates
-  meaningful (0 reworked, 0 deleted). Exit 0. Healthy. **No PR is opened in this case.**
-- `AUDIT_RESULT=ok: <summary>` — audited AND delivered changes: a PR was opened (or a dry-run
-  completed). `ok` implies a PR exists except for dry-run; do NOT use it when nothing changed.
-  Exit 0.
-- `AUDIT_RESULT=error: <reason>` — could NOT run or could NOT deliver (broken discovery,
-  push/PR failure, unexpected staged paths). **Exit non-zero so the scheduler alerts a human.**
+- `AUDIT_RESULT=nothing: <reason>` — nothing to do, OR an audit ran and found nothing to change
+  (no repo / no runner / no candidates / all candidates meaningful). Exit 0. Healthy. **No PR in this case.**
+- `AUDIT_RESULT=ok: <summary>` — audited AND delivered changes for review: a PR was opened, or —
+  in an environment that manages PRs for you — your changes were committed and pushed to the working
+  branch. Exit 0.
+- `AUDIT_RESULT=error: <reason>` — could NOT run or could NOT deliver. **Exit non-zero so the caller
+  alerts a human.**
 
 For Claude Code Cloud, surface the `error` path as a notification rather than swallowing it.
-A green run with `AUDIT_RESULT=nothing` every single week, on a repo you know adds tests, is
-itself a signal to investigate discovery (re-check shallow-clone deepening and the Step 2c
-diagnostic).
 
 ---
+
 
 ## SAFETY (read this — it governs every step)
 
