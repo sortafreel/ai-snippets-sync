@@ -9,3 +9,8 @@ matches:
     replace: "## Context\n- \n\n## Concerns\n- \n\n## Task\n- "
   - trigger: ":ai-review"
     replace: "## Context\n- I'll send you AI code reviewer suggestions\n- I need you to access if they are valid or not\n- Skip if not, ask to code if valid\n- The AI reviewer will explicitly say they are valid, you should not trust it, and check for yourself\n- DON'T OVERENGINEER\n- Ask clarifying questions, if any, until crystal clear\n\nIs it clear?"
+  - trigger: ":desc"
+    replace: "- Generate a `/tmp` markdown file to describe the changes we did in this branch. Be meaningful, concise, use human language, and don't use **bold**.\n- Include a concise PR title\n- Include concise bulletpoint list of what was the problem\n- Include concise bulletpoint list of what were our changes"
+  - trigger: ":A"
+    replace: "ARCHITECTURE.md"
+
