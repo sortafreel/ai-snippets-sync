@@ -13,4 +13,5 @@ matches:
     replace: "- Generate a `/tmp` markdown file to describe the changes we did in this branch. Be meaningful, concise, use human language, and don't use **bold**.\n- Include a concise PR title\n- Include concise bulletpoint list of what was the problem\n- Include concise bulletpoint list of what were our changes"
   - trigger: ":A"
     replace: "ARCHITECTURE.md"
-
+  - trigger: ":comment"
+    replace: "Write only concise, meaningful comments, without any fluff or unnecessary details. Avoid comments >2 lines, except special cases where longer comments are truly justified. People will read it, so use human language. Write the comments that will lock the meaning of this part, not something that would need to be rewritten in 3 days. Avoid modifying comments commited not by you."
