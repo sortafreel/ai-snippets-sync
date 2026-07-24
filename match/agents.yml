@@ -1,6 +1,6 @@
 matches:
   - trigger: ":ask"
-    replace: "Ask clarifying questions, if any, till crystal clear. Use this skill to iterate: https://github.com/mattpocock/skills/blob/66898f60e8c744e269f8ce06c2b2b99ce7660d5f/docs/engineering/grill-with-docs.md"
+    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill."
   - trigger: ":look"
     replace: "Analyze the context, attached files/URLs, if any, and related codebase in detail to understand the task and its feasibility."
   - trigger: ":test"
@@ -15,5 +15,3 @@ matches:
     replace: "ARCHITECTURE.md"
   - trigger: ":comment"
     replace: "Write only concise, meaningful comments, without any fluff or unnecessary details. Avoid comments >2 lines, except special cases where longer comments are truly justified. People will read it, so use human language. Write the comments that will lock the meaning of this part, not something that would need to be rewritten in 3 days. Avoid modifying comments commited not by you."
-
-  
