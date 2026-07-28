@@ -2,7 +2,7 @@ matches:
   - trigger: ":ask"
     replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill."
   - trigger: ":asg"
-    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill. Skills context:\n- /grill-with-docs (https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)\n- /grilling (https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)\n- /domain-modeling (https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling)"
+    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill. Skills context:\n  - /grill-with-docs (https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)\n  - /grilling (https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)\n  - /domain-modeling (https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling)"
   - trigger: ":hum"
     replace: "Use concise and simple human language. Don't use walls of text or highly specific jargon, as no human will read it. Don't drop important details."
   - trigger: ":look"
