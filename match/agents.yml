@@ -1,8 +1,8 @@
 matches:
   - trigger: ":ask"
-    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill (if you can't use skill directly - check its content/s installed). Don't ask multiple questions in a batch - ask them one by one with variants."
+    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grilling\" skill (if you can't use skill directly - check its content/s installed). Don't ask multiple questions in a batch - ask them one by one with variants."
   - trigger: ":asg"
-    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grill-with-docs\" skill. Don't ask multiple questions in a batch - ask them one by one with variants. Skills context (they aren't available locally, but opensource on GitHub):\n  - /grill-with-docs (https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)\n  - /grilling (https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)\n  - /domain-modeling (https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling)"
+    replace: "Ask clarifying questions, if any, till crystal clear. Use \"/grilling\" skill. Don't ask multiple questions in a batch - ask them one by one with variants. Skills context (they aren't available locally, but opensource on GitHub):\n  - /grilling (https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)"
   - trigger: ":hand"
     replace: "Prepare an md doc (copy-pasteable text) to handoff this session to another agent to continue. Use \"/handoff\" skill (if you can't use skill directly - check its content/s installed)."
   - trigger: ":hang"
