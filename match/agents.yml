@@ -23,3 +23,5 @@ matches:
     replace: "ARCHITECTURE.md"
   - trigger: ":comment"
     replace: "Write only concise, meaningful comments, without any fluff or unnecessary details. Avoid comments >2 lines, except special cases where longer comments are truly justified. People will read it, so use human language. Write the comments that will lock the meaning of this part, not something that would need to be rewritten in 3 days. Avoid modifying comments commited not by you."
+  - trigger: ":ntm"
+    replace: "tmux new-session -A -s "
