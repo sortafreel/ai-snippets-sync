@@ -6,29 +6,23 @@ Use this reference when building or validating the PDF. The input is the checked
 
 These are the user's established defaults. Newer instructions override the affected settings.
 
-| Setting | Default |
-| --- | --- |
-| Device | 10-inch colour e-ink, portrait |
-| Page | 432 × 576 pt (6 × 8 inches) |
-| Side margins | 36 pt each, including room for stylus notes |
-| Body text | About 11.2 pt with 15.8 pt leading |
-| Typeface | Embedded, legible fonts covering all required glyphs |
-| Background, including margins | Charcoal `#222222` |
-| Ordinary text | Light grey `#E6E6E6` |
-| Decorative rules | Grey `#A5A5A5`, where colour carries no meaning |
-| Figures | Original colours, transparency, and visual backing, often a white panel |
-| Numbering | Continuous final guide pages, consistent with viewer navigation; original source pages labeled separately |
-| Delivery | ZIP containing the verified PDF |
+Use [assets/reading-profile.json](../assets/reading-profile.json) as the single source of numeric and color tokens. The profile fixes the portrait page, margins, every authored text style, and the charcoal/light-grey palette. It uses bundled DejaVu Sans with real regular, bold, oblique and bold-oblique faces; DejaVu Sans Mono is the code family. Apply those same assets and tokens across papers and machines. [Python toolkit](toolkit.md) explains ReportLab and CSS adapters, font verification and the trial. Save the profile ID/hash and font hashes with each edition; profile changes affect future builds, while old editions keep their saved settings.
+
+Use continuous final guide numbering and ZIP delivery. Preserve original scientific artwork’s colors, transparency and backing. Additional script fonts and math-engine fonts are explicit, pinned companions; they do not replace the base prose family. Do not use machine-dependent fallback stacks or synthetic bold/italic. Add missing script coverage with a licensed font, record its bytes and hash, and test the actual characters. Keep the same companion font across later papers using that script or math engine.
+
+Table cells, table headers and captions use the shared profile’s normal size. Its review threshold is a trigger to split, enlarge or inspect material, not permission to shrink everything to that size. Judge figure labels at their final scale as well. Subscripts and navigation have different roles; avoid applying the table threshold blindly to them. Record any necessary local exception rather than silently changing the profile.
 
 The dark palette is a personal preference. Check readability at the intended display size and in grayscale; this does not substitute for an on-device test. Give newly authored meaning text labels or patterns as well as colour.
 
 ## Compose from the guide
 
-Choose an available renderer that handles the paper's mathematics and pagination reliably. For example, use a document renderer with math support, or ReportLab for prose with PyMuPDF for source-region placement and Poppler for an independent render. Discover installed tools before adding dependencies. Keep the build reproducible from the saved guide, assets, fonts, and profile.
+First reuse the skill’s portable helpers and inspect earlier task build directories for a compatible renderer. Copy a prior build into the new task and separate paper metadata, crop coordinates, content, source assertions and asset mappings from reusable code. Do not copy previous checks as evidence for a new paper. Prefer the proven renderer when it supports the new paper’s mathematics and scripts; discover installed tools before adding dependencies. Keep the build reproducible from the saved guide, assets, fonts and profile.
 
-Use one column, comfortable paragraph spacing, and restrained hierarchy. Treat a heading and its opening text, an equation and its nearby definitions, and a figure and its caption/reading instructions as related layout units. Keep each together where practical; split long units at a meaningful boundary. Rebalance short continuations that otherwise occupy nearly empty pages. Use flow-based pagination; if positioning manually, measure blocks and enforce overflow checks.
+Before drafting the full guide, run a small multipage trial through the actual chosen renderer. Exercise every text style and bold/italic face on dark and light panels, page-margin background and footers, an equation with fractions/indices, a wide table that continues onto another page, an SVG or cropped source figure, and all required writing systems. Inspect rendered output, text extraction, font embedding and navigation. The bundled probe provides a ReportLab starting point; add the paper’s difficult examples, and adapt the trial if using another renderer. Repeat affected cases after changing the renderer, fonts, profile or script coverage. A previous unchanged trial can be reused with its recorded inputs.
 
-Use a math-capable renderer to typeset verified notation with consistent mathematical fonts, fractions, indices, and alignment. Keep symbol definitions close to the equation and separate worked inputs, calculation steps, and interpretation visually. Check minus signs, Greek letters, operators, subscripts, and superscripts at the final reading size. When reliable typesetting of source notation is unavailable, preserve the original vector region and explain it nearby. Keep prose selectable and searchable.
+Use one column, comfortable paragraph spacing, and restrained hierarchy. Treat an example/speaker label and its opening response lines, a heading and its opening text, an equation and its nearby definitions, and a figure and its caption/reading instructions as related layout units. Keep each together where practical; split long units at a meaningful boundary. Rebalance short continuations that otherwise occupy nearly empty pages. Use flow-based pagination; if positioning manually, measure blocks and enforce overflow checks.
+
+Use a math-capable renderer to typeset verified notation with consistent mathematical fonts, fractions, indices, and alignment. Keep symbol definitions close to the equation and separate worked inputs, calculation steps, and interpretation visually. Check minus signs, Greek letters, operators, subscripts, and superscripts at the final reading size. When reliable typesetting of source notation is unavailable, preserve the original vector region and explain it nearby. Keep prose selectable and searchable. Test the math engine’s extracted output for duplicate hidden text. For engines that emit both visual HTML and accessibility MathML, use HTML-only output for the PDF only when the trial demonstrates duplication; keep the accessible source where useful. Do not discard accessibility markup by default. Type 3 fonts require inspection of glyphs, rendering and extraction, not automatic rejection.
 
 Apply the profile through the renderer's styles. This pipeline authors the dark layout directly from structured content, so a separate neutral PDF and PDF-stream recolouring pass are unnecessary. If a neutral preview helps diagnosis, render it from the same guide and settings, changing only the palette.
 
@@ -38,7 +32,7 @@ Give substantive subsections, worked examples, and major tables stable navigatio
 
 Determine figure boundaries from rendered pages, including vector paths, legends, axes, annotations, and every panel. Raster image extraction alone may miss most of a diagram. Prefer complete vector regions or original raster assets. A high-resolution crop, usually 250–300 DPI or higher, is a fallback when faithful vector placement is unavailable; inspect it at final size.
 
-Preserve aspect ratio, colours, labels, internal geometry, transparency, and backing. Crop only outside the content boundary. If a figure is too wide, use a dedicated page or clearly labeled enlarged panels while preserving every panel and its context. Use an original-layout facsimile when a safe reconstruction is unavailable, and state any remaining legibility limit. Research evidence must come from the original assets; generated illustrations are appropriate only for separately labeled teaching diagrams.
+Preserve aspect ratio, colours, labels, internal geometry, transparency, and backing. Crop only outside the content boundary. If a figure is too wide, use a dedicated page or clearly labeled enlarged panels while preserving every panel and its context. Prefer splitting or enlarged panels before rotation. A rotated facsimile may use a dedicated page when it materially improves legibility; state the reading orientation and keep its caption and source identifier associated with it. Use an original-layout facsimile when a safe reconstruction is unavailable, and state any remaining legibility limit. Research evidence must come from the original assets; generated illustrations are appropriate only for separately labeled teaching diagrams.
 
 Keep protected artwork on its original backing when its colours or transparency would change on charcoal. Apply dark styles to ordinary guide text and decoration; preserve meaningful colour in tables, equations, and code. Source scans may need light panels. Verify OCR against the scan before using it as editable content.
 
@@ -48,7 +42,7 @@ When placing a clipped source region, ensure the output contains only the intend
 
 ## Output checks
 
-Record results in the task's checks file and update final destinations in the coverage map.
+Record results in the task’s checks file and update final destinations in the coverage map. Use [Python toolkit](toolkit.md) for reusable checks, diagnostic limits and delivery gating. Keep the authoritative expected text separate from extracted PDF text; inspect any failure before changing a checker’s normalization rules.
 
 ### Guide content and navigation
 

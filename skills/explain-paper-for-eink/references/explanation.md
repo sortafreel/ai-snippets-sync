@@ -13,6 +13,8 @@ Begin with research provenance and a short numbered overview of the problem, pro
 5. Appendix explanations, integrated earlier or given dedicated sections.
 6. Practical interpretation, reproduction gaps, glossary, source issues, and references.
 
+Use compact front matter: provenance, a one-sentence idea, a few bullets describing the assumed starting knowledge, the numbered overview, and a reading map. Generate the map’s guide-page ranges only after pagination settles. A separate decorative cover is optional.
+
 Adapt this structure to the paper. Expand reasoning where the reader needs an intermediate step; use page count as a consequence of coverage and legibility. For RL, establish policy, observation, action, environment, trajectory, reward, and advantage before using them in a training objective.
 
 ## Make the reasoning explicit
@@ -63,9 +65,11 @@ Give every original figure and panel a destination, original identifier, source 
 
 Include every substantive table, preserving all cells, row/column associations, units, uncertainties, footnotes, and meaningful emphasis. Check transcribed numbers against the source. A new comparison or selected-results table is additional teaching material, not a substitute for the complete original data.
 
+For image-and-dialogue examples, retain the original image asset and transcribe the dialogue exactly, including speaker labels, meaningful formatting, errors, and behavior-sensitive syntax. Explain the example separately. Each representation should help the reader: use a facsimile for visual evidence, a transcript for legible exact text, and commentary for interpretation. Put lengthy supporting transcripts in a linked appendix within the same PDF, with return links; keep text needed to understand the immediate claim nearby. Do not remove content to meet a page-count target.
+
 Before a dense results table, explain the comparison, metrics, and reading direction. After it, identify the important changes and what they imply. For cumulative experiments, add a compact table of differences when it makes the steps easier to compare; retain the original results and identify the baseline for each difference. Explain that sequential additions measure changes along that particular sequence, not each intervention's isolated effect in every setting.
 
-Preserve the full bibliography and keep in-text citations traceable to its entries. Retain substantive acknowledgements, disclosures, and appendix details in appropriate locations. Exact original wording is necessary for quotations and behavior-sensitive prompt/code fragments; other prose may be explained and reorganized.
+Preserve the full bibliography and keep in-text citations traceable to its entries. Retain substantive acknowledgements, disclosures, and appendix details in appropriate locations. Generated bibliography back-reference lists identifying pages that cite an entry may be omitted with disclosure. Keep citation identifiers, publication page ranges and substantive reference text. Exact original wording is necessary for quotations and behavior-sensitive prompt/code fragments; other prose may be explained and reorganized.
 
 ## Results and practical interpretation
 

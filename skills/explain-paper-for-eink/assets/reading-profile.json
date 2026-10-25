@@ -1,0 +1,108 @@
+{
+  "id": "eink-dark-dejavu-v1",
+  "page_pt": [
+    432,
+    576
+  ],
+  "margins_pt": {
+    "top": 40,
+    "right": 36,
+    "bottom": 42,
+    "left": 36
+  },
+  "colors": {
+    "background": "#222222",
+    "text": "#E6E6E6",
+    "muted": "#BEBEBE",
+    "rule": "#A5A5A5",
+    "panel": "#303030",
+    "light_panel": "#FFFFFF",
+    "light_text": "#222222"
+  },
+  "fonts": {
+    "regular": "DejaVuSans.ttf",
+    "bold": "DejaVuSans-Bold.ttf",
+    "italic": "DejaVuSans-Oblique.ttf",
+    "bold_italic": "DejaVuSans-BoldOblique.ttf",
+    "mono": "DejaVuSansMono.ttf",
+    "mono_bold": "DejaVuSansMono-Bold.ttf",
+    "mono_italic": "DejaVuSansMono-Oblique.ttf",
+    "mono_bold_italic": "DejaVuSansMono-BoldOblique.ttf"
+  },
+  "styles": {
+    "body": {
+      "font": "regular",
+      "size_pt": 11.2,
+      "leading_pt": 15.8,
+      "color": "text"
+    },
+    "h1": {
+      "font": "bold",
+      "size_pt": 21,
+      "leading_pt": 26,
+      "color": "text"
+    },
+    "h2": {
+      "font": "bold",
+      "size_pt": 14,
+      "leading_pt": 19,
+      "color": "text"
+    },
+    "h3": {
+      "font": "bold",
+      "size_pt": 12,
+      "leading_pt": 16,
+      "color": "text"
+    },
+    "caption": {
+      "font": "regular",
+      "size_pt": 9.6,
+      "leading_pt": 13,
+      "color": "text",
+      "space_before_pt": 6
+    },
+    "table": {
+      "font": "regular",
+      "size_pt": 9.6,
+      "leading_pt": 13,
+      "color": "text"
+    },
+    "table_header": {
+      "font": "bold",
+      "size_pt": 9.6,
+      "leading_pt": 13,
+      "color": "text"
+    },
+    "label": {
+      "font": "bold",
+      "size_pt": 10.6,
+      "leading_pt": 15,
+      "color": "text"
+    },
+    "reference": {
+      "font": "regular",
+      "size_pt": 10.2,
+      "leading_pt": 14.5,
+      "color": "text"
+    },
+    "code": {
+      "font": "mono",
+      "size_pt": 9.6,
+      "leading_pt": 13,
+      "color": "text"
+    },
+    "equation": {
+      "font": "regular",
+      "size_pt": 13,
+      "leading_pt": 22,
+      "color": "text"
+    },
+    "footer": {
+      "font": "regular",
+      "size_pt": 8,
+      "leading_pt": 11,
+      "color": "muted"
+    }
+  },
+  "review_below_pt": 9.0
+}
