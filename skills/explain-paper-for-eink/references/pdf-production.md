@@ -26,13 +26,13 @@ The dark palette is a personal preference. Check readability at the intended dis
 
 Choose an available renderer that handles the paper's mathematics and pagination reliably. For example, use a document renderer with math support, or ReportLab for prose with PyMuPDF for source-region placement and Poppler for an independent render. Discover installed tools before adding dependencies. Keep the build reproducible from the saved guide, assets, fonts, and profile.
 
-Use one column, comfortable paragraph spacing, and restrained hierarchy. Keep headings with following text, captions with figures, and table headers repeated across page breaks. Split or move oversized material while retaining comfortable text size. Use flow-based pagination; if positioning manually, measure blocks and enforce overflow checks.
+Use one column, comfortable paragraph spacing, and restrained hierarchy. Treat a heading and its opening text, an equation and its nearby definitions, and a figure and its caption/reading instructions as related layout units. Keep each together where practical; split long units at a meaningful boundary. Rebalance short continuations that otherwise occupy nearly empty pages. Use flow-based pagination; if positioning manually, measure blocks and enforce overflow checks.
 
-Typeset equations from verified notation with appropriate math fonts. Check minus signs, Greek letters, operators, fractions, subscripts, superscripts, and alignment. When reliable typesetting of source notation is unavailable, preserve the original vector region and explain it nearby. Keep prose selectable and searchable.
+Use a math-capable renderer to typeset verified notation with consistent mathematical fonts, fractions, indices, and alignment. Keep symbol definitions close to the equation and separate worked inputs, calculation steps, and interpretation visually. Check minus signs, Greek letters, operators, subscripts, and superscripts at the final reading size. When reliable typesetting of source notation is unavailable, preserve the original vector region and explain it nearby. Keep prose selectable and searchable.
 
 Apply the profile through the renderer's styles. This pipeline authors the dark layout directly from structured content, so a separate neutral PDF and PDF-stream recolouring pass are unnecessary. If a neutral preview helps diagnosis, render it from the same guide and settings, changing only the palette.
 
-Rebuild contents, bookmarks, cross-references, and any page-count language after pagination settles. Keep the original-paper references separate from guide navigation. Use actual final page numbers rather than retaining an earlier edition's footers.
+Give substantive subsections, worked examples, and major tables stable navigation targets. Add descriptive bookmarks where they help the reader return to a concept or comparison; keep the opening contents concise. Rebuild contents, bookmarks, cross-references, and any page-count language after pagination settles. Keep the original-paper references separate from guide navigation. Use actual final page numbers rather than retaining an earlier edition's footers.
 
 ## Preserve scientific assets
 
@@ -42,7 +42,7 @@ Preserve aspect ratio, colours, labels, internal geometry, transparency, and bac
 
 Keep protected artwork on its original backing when its colours or transparency would change on charcoal. Apply dark styles to ordinary guide text and decoration; preserve meaningful colour in tables, equations, and code. Source scans may need light panels. Verify OCR against the scan before using it as editable content.
 
-For tables, split at logical row boundaries or into labeled column groups with stable row identities. Preserve cell/header associations, notes, and meaningful emphasis. Record repeated navigation headers as intentional duplicates.
+For tables, split at logical row boundaries or into labeled column groups with stable row identities. Choose groups around the comparisons the reader needs, keeping compared values together where practical. Repeat headers across page breaks and preserve cell/header associations, notes, and meaningful emphasis. Move or split oversized material rather than shrinking it below a comfortable reading size. Record repeated navigation headers as intentional duplicates.
 
 When placing a clipped source region, ensure the output contains only the intended region's content. Clipping or covering old material may leave invisible selectable text. Use isolated assets or sanitized placements and verify both rendering and extraction.
 
@@ -69,6 +69,8 @@ Record results in the task's checks file and update final destinations in the co
 
 Render every final page. Use contact sheets for an overview, then inspect each page at readable resolution, with closer checks of equations, tables, code, and multi-panel figures. Check clipping, overlap, orphan headings, missing glyphs, tiny labels, blurred assets, excessive whitespace, and unintended blank pages.
 
-Keep credits and source-page pointers with substantive content. Rebalance a page that contains only a footer or attribution. Check representative pages at the intended display size and in grayscale.
+Inspect every authored text style against its actual background: body text, headings, captions, table headers/cells, callouts, equations, links, and footers. Include bold and italic variants and styles used on both dark and light panels. Verify legibility in grayscale and at the intended display size; inherited styles can leave black caption text on charcoal even when ordinary prose is correct. Preserve original scientific artwork's colours and backing when fixing authored styles.
+
+Check that page breaks preserve the relationships defined under composition. Keep credits and source-page pointers with substantive content, and rebalance pages containing only attribution or a short stranded continuation. Preserve intentional full-page artwork and useful whitespace rather than maximizing page fill.
 
 Fix failures in the guide, asset preparation, or renderer. Rebuild cleanly and rerun the affected checks, including later pages when pagination changes. A clean screenshot does not establish clean selectable text; both checks are required.

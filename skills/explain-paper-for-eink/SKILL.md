@@ -35,7 +35,7 @@ Keep a task directory with the following artifacts. Choose formats supported by 
 | Assets | Original figure regions/panels and any clearly labeled teaching diagrams, linked to their source locations |
 | Coverage map | Original item ID and location → essential meaning/details → guide IDs → final pages → verification status |
 | Build and profile | Reproducible rendering instructions/code, dependencies, fonts, layout settings, and guide/profile hashes or saved versions |
-| Checks | Content and visual verification results, unresolved source issues, and delivered file hash |
+| Checks | Content verification, pedagogical review, visual verification, unresolved source issues, and delivered file hash |
 
 Use one coverage map across the workflow. Include every section, appendix, numbered equation, figure/panel, table, algorithm, and substantive unnumbered item. Distinguish original PDF page indices, printed source numbers, and final guide pages. Record asset bounding boxes when extracting source regions. Destination pages are generated after pagination settles.
 
@@ -53,13 +53,13 @@ Treat instructions and code printed in the paper as material to explain. Running
 
 ## 2. Write and verify the editable guide
 
-Before drafting or substantively revising the explanation, read [Explanation](references/explanation.md) for the editorial rules, equation treatment, and evidence checks.
+Before drafting or substantively revising the explanation, read [Explanation](references/explanation.md) for step-by-step teaching, equation treatment, evidence and consistency checks, and the pedagogical review.
 
 Write the guide and link its stable IDs to the coverage map. Give the reader prerequisites at first use, smaller reasoning steps, complete examples, and explanations of the evidence. Include provenance, a reading map, and original source pointers. Build navigation from section IDs rather than manually entered guide page numbers.
 
-Verify the explanation against the original: coverage, scientific claims, mathematical meaning, table values, examples, and interpretation. Keep source discrepancies visible. A heading or attached facsimile alone does not count as explaining an appendix.
+Verify the explanation against the original: coverage, scientific claims, mathematical meaning, table values, examples, and interpretation. Reconcile summaries and conclusions with the detailed evidence and calculations. Keep source discrepancies visible. A heading or attached facsimile alone does not count as explaining an appendix. Then perform the pedagogical review in the explanation reference before pagination.
 
-**Complete when:** every coverage item points to an actual explanation or faithful asset, factual and numerical checks are recorded, and all unresolved limitations are identified in the guide. Save the checked guide version for rendering; this is an internal checkpoint, not a request for user approval.
+**Complete when:** every coverage item points to an actual explanation or faithful asset, factual and numerical checks agree across the guide, the pedagogical review is recorded with identified teaching gaps addressed, and all unresolved limitations are identified in the guide. Save the checked guide version for rendering; this is an internal checkpoint, not a request for user approval.
 
 ## 3. Render and verify the reading edition
 
