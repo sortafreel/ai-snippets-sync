@@ -1,4 +1,0 @@
-- I did a round of AI review for the PR https://github.com/PostHog/posthog/pull/66456, pull the data and use it as an input for the review skill (@/Users/woutut/Library/Application Support/espanso/skills/pr-review/POST_COMMENTS.md) and post the comments
-- I need to you to start reviewer agents in parallel (as ultracode) and validate each specific issue
-- By validate - I mean keeping and fixing things that are actual problems and could be encountered in production, not theoretic 1 in a million things
-- Don't skip too many though, lean into "makes sense and could happen", not "will happen every day"
