@@ -26,6 +26,8 @@ Use a math-capable renderer to typeset verified notation with consistent mathema
 
 Apply the profile through the renderer's styles. This pipeline authors the dark layout directly from structured content, so a separate neutral PDF and PDF-stream recolouring pass are unnecessary. If a neutral preview helps diagnosis, render it from the same guide and settings, changing only the palette.
 
+Compose the [opening TL;DR](explanation.md#required-opening-tldr) as the first consecutive PDF pages, with a visible label and a stable `tldr` navigation target. Give it the first top-level bookmark and an entry in the later contents. Keep the shared portrait geometry, fonts and sizes; use page breaks to make each summary page coherent. After pagination settles, verify the actual TL;DR page count against its chosen length and required bounds. Rebuild the reading map and all following page references when its length changes.
+
 Give substantive subsections, worked examples, and major tables stable navigation targets. Add descriptive bookmarks where they help the reader return to a concept or comparison; keep the opening contents concise. Rebuild contents, bookmarks, cross-references, and any page-count language after pagination settles. Keep the original-paper references separate from guide navigation. Use actual final page numbers rather than retaining an earlier edition's footers.
 
 ## Preserve scientific assets
@@ -46,6 +48,7 @@ Record results in the task’s checks file and update final destinations in the 
 
 ### Guide content and navigation
 
+- Confirm that the TL;DR begins on the first PDF page, satisfies its opening-page contract, and has a working bookmark and contents link. Record its actual page range in the checks.
 - Compare ordered guide blocks with extracted PDF text, accounting for deliberate navigation repeats. Normalize only verified layout whitespace and line-wrap changes; preserve signs, punctuation, accents, ligatures, and symbol distinctions.
 - Inspect reading order, missing text, duplicated or hidden text, stale references, and placeholder content. Character counts alone cannot establish correct order or completeness.
 - Check every table cell's value and row/column association, including units and notes. Verify code tokens, indentation, and line breaks when code is included.

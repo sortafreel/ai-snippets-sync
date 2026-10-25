@@ -4,7 +4,7 @@ Use this reference while writing or reviewing the editable guide. Its checks com
 
 ## Organize around understanding
 
-Begin with research provenance and a short numbered overview of the problem, proposed mechanism, main evidence, and limitations. Organize the rest to reduce prerequisite burden while keeping coverage traceable. A useful progression is:
+Begin with the required TL;DR below. Organize the rest to reduce prerequisite burden while keeping coverage traceable. A useful progression after the TL;DR is:
 
 1. A reading map between the guide and original sections.
 2. Foundations introduced where the method needs them.
@@ -13,9 +13,27 @@ Begin with research provenance and a short numbered overview of the problem, pro
 5. Appendix explanations, integrated earlier or given dedicated sections.
 6. Practical interpretation, reproduction gaps, glossary, source issues, and references.
 
-Use compact front matter: provenance, a one-sentence idea, a few bullets describing the assumed starting knowledge, the numbered overview, and a reading map. Generate the map’s guide-page ranges only after pagination settles. A separate decorative cover is optional.
+Put compact paper identification and provenance on the first TL;DR page. Follow the TL;DR with the assumed starting knowledge and reading map; generate the map’s guide-page ranges only after pagination settles. Incorporate an existing opening overview into the TL;DR, retaining useful detail in the main explanation as needed. This avoids two consecutive summaries serving the same purpose.
 
 Adapt this structure to the paper. Expand reasoning where the reader needs an intermediate step; use page count as a consequence of coverage and legibility. For RL, establish policy, observation, action, environment, trajectory, reward, and advantage before using them in a training objective.
+
+## Required opening TL;DR
+
+Every reading edition starts with a clearly labeled **TL;DR** on PDF page 1, before the contents, reading map or detailed explanation. Treat the requested “slides” as 1–5 portrait pages inside the reading PDF, using the shared e-ink profile. Combine title/provenance with useful summary content on the first page; a standalone cover must not precede it.
+
+Choose the shortest length that gives a faithful overview at the normal reading size. Use the original paper’s length and substantive scope, including important appendix findings, to guide the choice: about one page for a short, focused contribution; two or three for a typical paper with several important results; four or five for a long or unusually complex paper. These are selection guidelines, not rigid source-page thresholds. The expanded guide’s page count is not the measure. The final rendered TL;DR must fit within five pages; select and simplify content rather than shrinking fonts or padding out a quota.
+
+Make page 1 sufficient for a quick understanding: the problem, the core idea in one sentence, the main finding, what it means, and the most important qualification. Use additional pages to explain the mechanism, evidence and implications where needed. Across the TL;DR, answer:
+
+1. **What is the paper about?** Identify the problem, why it matters and the contribution relative to the prior approach.
+2. **What is the idea?** Explain the mechanism in plain language, with only the prerequisites needed to understand the summary.
+3. **What do the results show?** Select the decisive findings. Give key numbers when reported, with the metric, baseline and relevant evaluation conditions; explain the comparison in words. For theoretical or qualitative work, state the central result and its assumptions instead of inventing benchmark evidence.
+4. **What does it mean?** Explain the practical or scientific implications for the intended reader, distinguishing reported evidence from engineering interpretation.
+5. **What should qualify that conclusion?** Include the limitations, tradeoffs, negative findings or source discrepancies that materially change the takeaway. Keep each qualification near the claim it affects.
+
+Use short, connected points with descriptive headings and enough context to stand alone. Define essential unfamiliar terms locally. A small original figure or compact comparison may help if it is readable at the shared sizes. Link key claims to the detailed guide and retain compact source pointers. The TL;DR is a selective explanation; the main guide still provides full coverage.
+
+**Standalone review:** read only the opening pages. Can the intended reader explain the problem, proposed idea, main evidence and its practical meaning, including the central caveat, without reading later sections? Verify every summary claim and number against the checked body and source. Record the chosen TL;DR length and review result in the task’s checks. An abstract pasted verbatim, a contents page, a list of topics or a heading alone does not satisfy this requirement. Recheck the TL;DR whenever results or interpretations change.
 
 ## Make the reasoning explicit
 
