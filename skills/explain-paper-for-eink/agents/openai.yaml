@@ -1,0 +1,3 @@
+interface:
+  display_name: "Explain a Paper for E-ink"
+  short_description: "Explain AI papers and build e-ink reading PDFs"
